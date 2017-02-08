@@ -56,7 +56,7 @@ function parseRes(cb){
 	return function(err,res){
 		if(err) return cb(err);
 		if(res.error) return cb(res.error);
-		return cb(res);
+		return cb(null,res);
 	***REMOVED***
 ***REMOVED***
 

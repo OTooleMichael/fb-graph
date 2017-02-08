@@ -17,7 +17,7 @@ function getReport(){
 	// one specific request example (can also format as might be expected by facebook);
 
 	var options = {
-	  accountId:"111882249020036",
+	  accountId:"AcocuntID",
 	  startDate:"2017-01-01",
 	  endDate:"2017-01-02",
 	  dimensions:[
@@ -26,10 +26,7 @@ function getReport(){
 	  ],
 	  metrics:[
 	  	"spend",
-	  	"clicks",
-	  	"paid_pattern::actions",
-	  	"paid_material::actions",
-	  	"paid_course::actions"
+	  	"clicks"
 	  ],
 	  attributionWindow:["7d_click"],
 	  attributionType:"conversion"
