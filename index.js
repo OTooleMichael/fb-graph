@@ -113,11 +113,11 @@ FBAds.prototype.flattenActions = function (data,acts,attriList){
 								out[i]["paid_all"+val+"_"+attr] = out[i]["paid_all"+val+"_"+attr] ||0;
 								out[i]["paid_all"+val+"_"+attr] += ac[attr]||0;
 							***REMOVED***
-							out[i][title+val+"_"+attr] = ac[attr]||0 ;
+							out[i][title+val+"_"+attr] = parseFloat(ac[attr])||0 ;
 						***REMOVED***)
 					***REMOVED***
 				***REMOVED***);	
-			***REMOVED***else if( /.*(impressions|clicks|reach|value).*/gi.test(el) ){
+			***REMOVED***else if( /.*(impressions|clicks|reach|value|spend).*/gi.test(el) ){
 				out[i][el]=parseFloat(ob[el]);
 			***REMOVED***else{
 				out[i][el]=ob[el];
