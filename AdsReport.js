@@ -104,7 +104,8 @@ AdsReport.prototype._processData = function(data){
 	if(this.userInput){
 		// if it was a userInput formatted request give a formatted answer;
 		try{
-			data = this.fb.flattenActions(data, this.userParams.actions.join(), this.userParams.attributionWindow );
+			data = this.fb.flattenActions(data, this.userParams.actions.join(), this.userParams.params.action_attribution_windows );
+			if(typeof this.processAfterFlatten === "function") data = this.processAfterFlatten(data);
 		}catch(error){
 			return this._error({
 				title:"ERROR_PARSING_REPONSE",
