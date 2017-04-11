@@ -57,7 +57,7 @@ function fbRequest(options,cb){
 		query+=el+"="+part+"&";
 	}
 	query = query.substring(0,query.length - 1);
-	query  = "?"+query; // query must be ? prefixed 
+	query  =  (requestType === "GET")  ? "?"+query : query; // query must be ? prefixed // i changed it back, I dont hink its working except for this one specific case. YAY Facebook!
 
 	var fullPath = '/v'+fbGraphApiVerion+'/'+path;
 	// have to do this for get
