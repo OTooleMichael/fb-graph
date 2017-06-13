@@ -35,7 +35,6 @@ function page(page,cb){
 	        cb(null,data);
 	    });
 	});
-	req.write(query,"utf-8");
 	req.on('error', function(e) {
 	    console.log('Problem with request: ' + e.message);
 	    cb(e,null);
