@@ -1,13 +1,17 @@
 var util = require("util");
-var EventEmitter = require('events').EventEmitter;
+const { Readable }= require('stream');
 
 // this is an object to better control requests.
 function AdsReport(fb,params){
 	this.fb = fb;
-	EventEmitter.call(this);
+	Readable.call(this,{
+		objectMode:true
+	});
 	if(!params.accountId) throw new Error("Account Id is a required param!");
 	this.userInput = (params.startDate && params.endDate && params.metrics);
 	this.accountId = params.accountId;
+	this.currentRequest = false;
+	this._isReadPaused = true;
 	this.request = params;
 	if(this.userInput){
 		this.userParams = this.fb.parseUserInputsToParams(params)
@@ -17,20 +21,60 @@ function AdsReport(fb,params){
 		rowCount:0,
 		pages:0
 	}
-	this.rows = [];
+	this._isCompleted = false;
+	this._rows = [];
 	return this;
 }
-// it inherits from EventEmitter
-util.inherits(AdsReport, EventEmitter);
-
+// it inherits from Readable
+util.inherits(AdsReport, Readable);
+AdsReport.prototype._read = function (size) {
+    this._isReadPaused = false;
+    this._distibute();
+    this._resume();
+};
+AdsReport.prototype._distibute = function()
+{
+	if(this._isReadPaused) return;
+	while(this._rows.length && this.push(this._rows.shift())){
+		// nothign here
+	}
+	this._isReadPaused = (this._rows.length > 0 )
+	if(this._isCompleted){
+    	return this.push(null);
+    }
+}
+AdsReport.prototype._resume = function() {
+	if(this._rows.length > 1001) return null
+	if(!this.currentRequest) return null;
+	let waitTime = this.safeTime - Date.now();
+	let req = this.currentRequest.bind(this);
+	if(waitTime > 0){
+		setTimeout(()=>req(),waitTime)
+	}
+	else
+	{
+		this.currentRequest();
+	}
+	this.currentRequest = null;
+	return this
+};
 AdsReport.prototype.stream = function() {
 	this.isStream = true;
 	this._start();
-	return this;
+	return this
 };
+
 AdsReport.prototype.run = function(cb) {
-	if(typeof cb !== "function") throw new Error("Cb rewuired to run AdsReport");
+	if(typeof cb !== "function") throw new Error("Cb required to run AdsReport");
 	this.cb = cb;
+	let rows = [];
+	this.on('error',this.cb)
+	.on('end',()=>{
+		this.emit('complete');
+		this.cb(null,rows);
+	}).on('data',function(row){
+		rows.push(row)
+	})
 	this._start();
 	return this;
 };
@@ -60,7 +104,6 @@ AdsReport.prototype._getReport = function(){
 	}
 }
 AdsReport.prototype._processReponse =function(err,res){
-	this.nextPage;
 	if(err) return this._error(err);
 	if(res.data){
 		this._processData(res.data);
@@ -84,11 +127,15 @@ AdsReport.prototype._processReponse =function(err,res){
 	}
 	if(res.paging && res.paging.next){
 		this.nextPage = res.paging.next;
-		setTimeout(()=>{
-			this.fb.page(res.paging.next,this._processReponse.bind(this))
-		},500);
+		this.safeTime =  Date.now() + 500;
+		this.currentRequest = this.fb.page.bind(this,res.paging.next,this._processReponse.bind(this))
+		this._distibute();
+		this._resume();
 	}else{
-		return this._respond("complete");
+		this._isCompleted = true;
+		this._distibute();
+		this.emit('complete',this.progress);
+		return
 	}
 };
 AdsReport.prototype.retry = function(){
@@ -96,9 +143,9 @@ AdsReport.prototype.retry = function(){
 	if(this._awaitingRetry) return this._error("RETRY_PENDING");
 	console.log("this is a 20 mins wait now");
 	this._awaitingRetry = true;
-	setTimeout(()=>{
-		this.fb.page(this.nextPage,this._processReponse.bind(this))
-	},1000*60*20)
+	this.safeTime =  Date.now() + 1000*60*20;
+	this.currentRequest = this.fb.page.bind(this,this.nextPage,this._processReponse.bind(this));
+	this._resume();
 }
 AdsReport.prototype._processData = function(data){
 	if(this.userInput){
@@ -115,28 +162,12 @@ AdsReport.prototype._processData = function(data){
 	};
 	this.progress.rowCount += data.length;
 	this.progress.pages ++;
-	if(this.isStream){
-		return this._respond("data",data);
-	}else{
-		this.rows = this.rows.concat(data);
-	}
+	this._rows = this._rows.concat(data);
 	return this
 }
 AdsReport.prototype._error = function(err){
-	return this._respond("error",err);
+	return this.emit('error',err);
 }
-AdsReport.prototype._respond = function(type,data){
-	data = (type === "complete") ? this.progress : data;
-	if(this.isStream){
-		return this.emit(type,data);
-	}
-	if(type == "error"){
-		return this.cb(data);
-	}else if(type == "complete"){
-		return this.cb(null,this.rows);
-	}
-	return this
-};
 // end of object
 
 module.exports = AdsReport;
