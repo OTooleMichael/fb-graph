@@ -1,6 +1,6 @@
 {
   "name": "fb-graph",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "For Facebook graph API and Marketing Api, with normalised querying and responses",
   "main": "index.js",
   "scripts": {
