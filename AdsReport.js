@@ -39,7 +39,7 @@ AdsReport.prototype._distibute = function()
 		// nothign here
 	}
 	this._isReadPaused = (this._rows.length > 0 )
-	if(this._isCompleted){
+	if(this._isCompleted && !this._isReadPaused ){
     	return this.push(null);
     }
 }
@@ -47,7 +47,7 @@ AdsReport.prototype._resume = function() {
 	if(this._rows.length > 1001) return null
 	if(!this.currentRequest) return null;
 	let waitTime = this.safeTime - Date.now();
-	let req = this.currentRequest.bind(this);
+	var req = this.currentRequest;
 	if(waitTime > 0){
 		setTimeout(()=>req(),waitTime)
 	}
@@ -128,7 +128,9 @@ AdsReport.prototype._processReponse =function(err,res){
 	if(res.paging && res.paging.next){
 		this.nextPage = res.paging.next;
 		this.safeTime =  Date.now() + 500;
-		this.currentRequest = this.fb.page.bind(this,res.paging.next,this._processReponse.bind(this))
+		this.currentRequest = ()=>{
+			this.fb.page(res.paging.next,this._processReponse.bind(this))
+		};
 		this._distibute();
 		this._resume();
 	}else{
@@ -144,7 +146,9 @@ AdsReport.prototype.retry = function(){
 	console.log("this is a 20 mins wait now");
 	this._awaitingRetry = true;
 	this.safeTime =  Date.now() + 1000*60*20;
-	this.currentRequest = this.fb.page.bind(this,this.nextPage,this._processReponse.bind(this));
+	this.currentRequest = ()=>{
+		this.fb.page(this.nextPage,this._processReponse.bind(this));
+	}
 	this._resume();
 }
 AdsReport.prototype._processData = function(data){
