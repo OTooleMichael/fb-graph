@@ -1,14 +1,10 @@
 import request from 'request'
+import { wait ***REMOVED*** from './tools'
 import {
-  wait, AdInsights
-***REMOVED*** from './tools'
-export const GRAPH_VERSION = 'v9.0';
-export const GRAPH_DOMAIN = 'https://graph.facebook.com'
-export const GRAPH_VIDEO_DOMAIN = 'https://graph-video.facebook.com'
-export interface FbAPIAuth {
-  accessToken: string;
-  graphVersion: string
-***REMOVED***
+  GRAPH_DOMAIN, FbAPIAuth,
+  ReportRow, CreateReportParams
+***REMOVED*** from './constants'
+
 interface ErrorAPIRes {
   message: string;
   type: string,
@@ -18,13 +14,13 @@ interface ErrorAPIRes {
 export class FbException extends Error {
   type: string;
   code: number;
-  fbtrace_id: string;
+  fbtraceId: string;
   request?: request.Options
   constructor(error: ErrorAPIRes, reqOptions?: request.Options){
     super(error.message)
     this.type = error.type
     this.code = error.code
-    this.fbtrace_id = error.fbtrace_id
+    this.fbtraceId = error.fbtrace_id
     this.request = reqOptions
   ***REMOVED***
 ***REMOVED***
@@ -55,22 +51,22 @@ export function requestPromise<T>(params: ReqParams): Promise<T> {
       try{
         if(body.error){
           throw new FbException(body.error as ErrorAPIRes, options)
-***REMOVED***
+    ***REMOVED***
 
         body.requestInfo = {
           statusCode
-***REMOVED***
+    ***REMOVED***
         if(headers['x-fb-ads-insights-throttle']){
           body.requestInfo = {
             ...body.requestInfo,
             ...JSON.parse(headers['x-fb-ads-insights-throttle'] as string)
-  ***REMOVED***
-***REMOVED***
+      ***REMOVED***
+    ***REMOVED***
         return resolve(body)
   ***REMOVED***catch(err){
         return reject(err)
   ***REMOVED***
-***REMOVED***)
+***REMOVED***
   ***REMOVED***)
 ***REMOVED***
 
@@ -92,22 +88,22 @@ function encodeParams(params: Record<string, any>): Record<string, string> {
   ***REMOVED***else{
         output[key] = param
   ***REMOVED***
-***REMOVED***)
+***REMOVED***
   return output
 ***REMOVED***
 
 export function callAPI<T>( auth:FbAPIAuth, options: FBAPICallParams): Promise<T> {
   const { graphVersion, accessToken ***REMOVED*** = auth;
-  let {
-    method, path, params = {***REMOVED***,
+  const {
+    method, path,
     urlOverride = '',
   ***REMOVED*** = options
-
-  let data = {***REMOVED***
+  let { params = {***REMOVED*** ***REMOVED*** = options
+  let data = {***REMOVED***;
 
   if (method === 'POST' || method === 'PUT') {
     data = params;
-    params = {***REMOVED***
+    params = {***REMOVED***;
   ***REMOVED***
   params.access_token = accessToken;
   const domain = urlOverride || GRAPH_DOMAIN;
@@ -144,7 +140,7 @@ export async function createAsyncReport(auth: FbAPIAuth, {
   ***REMOVED***)
 	if(!res.report_run_id){
 		throw new Error("NO_REPORT_ID")
-	***REMOVED***
+	***REMOVED***;
 	return res.report_run_id
 ***REMOVED***
 interface AsyncCheck {
@@ -181,7 +177,7 @@ export async function *checkAsyncStatus(
     const res = await callAPI<AsyncCheck>(auth, {
       method:'GET',
       path:reportId
-***REMOVED***)
+***REMOVED***
     runningMillis = Date.now() - started
     const output: AsyncStatus = {
       reportId,
@@ -219,20 +215,20 @@ interface DowloadReportReq {
   pageSize?:number
 ***REMOVED***
 
-export async function *downloadReport<T extends AdInsights.ReportRow = AdInsights.ReportRow>(
+export async function *downloadReport<T extends ReportRow = ReportRow>(
   auth: FbAPIAuth, { reportId, pageSize = 5000 ***REMOVED***: DowloadReportReq
 ): AsyncGenerator<T>{
-  const { data, paging ***REMOVED*** = await callAPI< ReportRes<T> >(auth, {
+  const { data:dataTop, paging:pagingTop ***REMOVED*** = await callAPI< ReportRes<T> >(auth, {
     method:'GET',
     path:reportId+"/insights",
     params:{
       limit:pageSize.toString()
 ***REMOVED***
   ***REMOVED***)
-  for(const row of data){
+  for(const row of dataTop){
     yield row
   ***REMOVED***
-  let nextPage = paging?.next;
+  let nextPage = pagingTop?.next;
   while(nextPage){
     const { data, paging ***REMOVED*** = await page<ReportRes<T>>(nextPage);
     for(const row of data){
@@ -245,11 +241,8 @@ export function page<T>(url: string){
 	return requestPromise<T>({method:'GET',url, qs:{***REMOVED******REMOVED***)
 ***REMOVED***
 
-export interface CreateReportParams extends AdInsights.ReportParams{
-  accountId: string;
-  pageSize?: number;
-***REMOVED***
-export async function *reportStream<T extends AdInsights.ReportRow>(
+
+export async function *reportStream<T extends ReportRow>(
   auth: FbAPIAuth, params: CreateReportParams
 ): AsyncGenerator<T>{
   const { accountId, pageSize, ...options ***REMOVED*** = params

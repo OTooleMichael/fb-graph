@@ -21,7 +21,7 @@ const REQ = {
   ],
   attributionWindow:["1d_click"],//,"7d_click","28d_click"],
   attributionType:"impression" //. this is just an artifact only spend matters
-***REMOVED***
+***REMOVED***;
 ***REMOVED***
 	let fb = new Fb({token:TOKEN,debug:true***REMOVED***);
 	let req = fb.createAdsReport(REQ);
@@ -30,7 +30,7 @@ const REQ = {
 	stream.on('data',function(row){
 		if(i%50 ===0 ){
 			console.log(row,i)
-		***REMOVED***
+		***REMOVED***;
 		if(i === 140){
 			console.log('PAUSING ')
 			this.pause();
