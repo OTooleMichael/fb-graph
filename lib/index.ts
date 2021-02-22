@@ -54,7 +54,7 @@ export class FbAdsInsights extends Emitter {
 			reportId,
 		***REMOVED***)
 		this.reportId = reportId
-		for await( let status of checkAsyncStatus(auth, { reportId ***REMOVED***) ){
+		for await( const status of checkAsyncStatus(auth, { reportId ***REMOVED***) ){
 			this.emit('progress',{
 				event:'CHECKED',
 				...status
@@ -70,7 +70,7 @@ export class FbAdsInsights extends Emitter {
 			objectMode:true,
 			read:async ()=>{
 				(async () => {
-					for await (let row of this.generator<T>()){
+					for await (const row of this.generator<T>()){
 						if (!stream.push(row)){
 							await new Promise((resolve) => stream.once("drain", resolve))
 						***REMOVED***
@@ -85,8 +85,8 @@ export class FbAdsInsights extends Emitter {
 		return stream
 	***REMOVED***
 	async get<T extends AdInsights.ReportRow>(): Promise<T[]>{
-		let rows:T[] = []
-		for await(let row of this.generator<T>()){
+		const rows:T[] = []
+		for await(const row of this.generator<T>()){
 			rows.push(row)
 		***REMOVED***
 		return rows
@@ -95,8 +95,8 @@ export class FbAdsInsights extends Emitter {
 		const { auth ***REMOVED*** = this
 		const { pageSize ***REMOVED*** = this.params
 		const reportId = await this.prepare()
-		const generator = downloadReport<T>(auth, { reportId, pageSize ***REMOVED***) 
-		for await(let row of generator){
+		const generator = downloadReport<T>(auth, { reportId, pageSize ***REMOVED***)
+		for await(const row of generator){
 			this.totalRows = this.totalRows + 1
 			this.emit('data',row)
 			yield row

@@ -24,17 +24,17 @@ export namespace AdInsights {
 		view_1d= '1d_view',
 		view_7d = '7d_view',
 		view_28d = '28d_view',
-		click_1d = '1d_click', 
-		click_7d = '7d_click', 
-		click_28d = '28d_click', 
-		dda = 'dda', 
+		click_1d = '1d_click',
+		click_7d = '7d_click',
+		click_28d = '28d_click',
+		dda = 'dda',
 		default = 'default'
 	***REMOVED***
 	type BaseAction = Partial<Record<AdInsights.AttributionWindow, string>>
 	export type InsightAction = BaseAction & {
 		action_type: string;
 		value: string;
-	***REMOVED*** 
+	***REMOVED***
 	export type ReportField = GetArrayElementType<typeof FIELDS>
 	export type ReportBreakdown = GetArrayElementType<typeof BREAKDOWNS>
 	export type DateFields = 'date_start' | 'date_stop'
@@ -65,7 +65,7 @@ export function flattenActions<T extends Record<string, string | number> = Recor
 	attriList?: AdInsights.AttributionWindow[]
 ): T {
 	const attributionWindowList = attriList || Object.values(AdInsights.AttributionWindow);
-	const userRequestedActions = (typeof actionsList === "string") ? [actionsList] : actionsList;	
+	const userRequestedActions = (typeof actionsList === "string") ? [actionsList] : actionsList;
 	const row: Record<string, string | number> = {***REMOVED***
 	Object.entries(data).forEach(function([el, ob]){
 		if(!ob){
@@ -81,12 +81,12 @@ export function flattenActions<T extends Record<string, string | number> = Recor
 
 				if( userRequestedActions.includes(title) ){
 					attributionWindowList.forEach(function(attr){
-						let value = (ac[attr] ? parseFloat(ac[attr] as string) : 0) || 0
+						const value = (ac[attr] ? parseFloat(ac[attr] as string) : 0) || 0
 						row[title + val + "_" + attr] = value;
 					***REMOVED***)
 				***REMOVED***
 			***REMOVED***);
-			return	
+			return
 		***REMOVED***
 		const value = ob as string
 		if( VAL_REG.test(el) ){
@@ -116,8 +116,8 @@ export interface UserInputs {
 ***REMOVED***
 const DATE_FIELDS = ['day','date','week','month','all_days']
 export function parseUserInputsToParams(userInputs: UserInputs): { actions:string[], params:AdInsights.ReportParams ***REMOVED***{
-	var levels = [];
-	var actions = [];
+	const levels = [];
+	const actions = [];
 	// these will make up the paramaters of the Post request;
 	const postParams: AdInsights.ReportParams = {
 		time_increment:'all_days' as AdInsights.time_increment,
@@ -139,10 +139,10 @@ export function parseUserInputsToParams(userInputs: UserInputs): { actions:strin
 	***REMOVED***else if(listToParse.includes('month')){
 		postParams.time_increment = 28
 	***REMOVED***
-	
+
 	// transform the dimensions / metrics logic into a facebook graph set of paramaters
-	for(let el of listToParse){
-		let [ col, meta = ''] = el.split("::");
+	for(const el of listToParse){
+		const [ col, meta = ''] = el.split("::");
 		if(DATE_FIELDS.includes(col)){
 			continue
 		***REMOVED***
@@ -151,7 +151,7 @@ export function parseUserInputsToParams(userInputs: UserInputs): { actions:strin
 		***REMOVED***else if(BREAKDOWNS.includes(col as AdInsights.ReportBreakdown) || meta.includes("breakdowns") ){
 			postParams.breakdowns.push(col as AdInsights.ReportBreakdown);
 		***REMOVED***else if(meta.includes("time_increment")){
-			postParams.time_increment = timeToNumber(col as 'day' | 'week' | 'month') || "all_days"; 
+			postParams.time_increment = timeToNumber(col as 'day' | 'week' | 'month') || "all_days";
 		***REMOVED***else{
 			postParams.fields.push(col as AdInsights.ReportField)
 		***REMOVED***
@@ -167,9 +167,9 @@ export function parseUserInputsToParams(userInputs: UserInputs): { actions:strin
 		postParams.fields.push("action_values");
 	***REMOVED***
 	postParams.level = findLowestLevel(levels); // find the lowest/deepest level eg. (ad,ad_set,campaign,account)
-  return { 
+  return {
     params:postParams,
-    actions:actions // actions will be needed for parsing the response
+    actions // actions will be needed for parsing the response
   ***REMOVED***
 ***REMOVED***
 
@@ -183,7 +183,7 @@ function timeToNumber(time: 'day' | 'week' | 'month'): number{
 ***REMOVED***
 
 function findLowestLevel(levels: string[]): AdInsights.Level {
-	var str = levels.join();
+	const str = levels.join();
 	if(str.search(/ad_id|ad_name/gi)>-1){
 		return AdInsights.Level.ad
 	***REMOVED***else if(str.includes("adset")){

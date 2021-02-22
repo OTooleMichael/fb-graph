@@ -22,13 +22,13 @@ import { flattenActions, parseUserInputsToParams ***REMOVED*** from './tools';
 ***REMOVED***
 ***REMOVED***)
 ***REMOVED***
-    let report = await fb.insights({
+***REMOVED***
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***).limit(100).on('progress',function(event){
 ***REMOVED***
 ***REMOVED***)
-    for await(let row of report.generator()){
+***REMOVED***
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
@@ -57,12 +57,12 @@ import { flattenActions, parseUserInputsToParams ***REMOVED*** from './tools';
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
-***REMOVED***   
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
-***REMOVED*** 
+***REMOVED***
+***REMOVED***
 ***REMOVED***
 ***REMOVED***
 // 	***REMOVED***
