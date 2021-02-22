@@ -8,7 +8,7 @@ import {
 	GRAPH_VERSION, CreateReportParams, ReportParams, FbAPIAuth,
 	AttributionWindow, Level
 } from './constants'
-import FbAdsInsights from './FbAdsInsights'
+import { FbAdsInsights } from './FbAdsInsights'
 import { flattenActions, parseUserInputsToParams } from './tools';
 export {
 	FBAPICallParams,

@@ -5,7 +5,24 @@ import {
 import {
 	FbAPIAuth, CreateReportParams, ReportRow
 } from './constants'
-export default class FbAdsInsights extends Readable {
+interface EventComplete {
+    event:'COMPLETE' | 'LIMIT_REACHED',
+    totalRows: number
+}
+type EventProgress = {
+    event:'CREATED',
+    reportId: string,
+} | (AsyncStatus & {
+    event:'CHECKED'
+})
+export declare interface FbAdsInsights<RowT extends ReportRow = ReportRow>{
+    on(event: 'progress', listener: (event: EventProgress) => void): this;
+    on(event: 'data', listener: (row: RowT)=>void): this;
+    on(event: 'complete', listener: (event: EventComplete)=> void): this;
+    on(event: 'error', listener: (error: Error)=> void): this;
+    on(event: string, listener: Function): this;
+}
+export class FbAdsInsights<RowT extends ReportRow = ReportRow> extends Readable {
 	auth: FbAPIAuth;
 	params: CreateReportParams;
 	reportId?: string;
@@ -52,7 +69,7 @@ export default class FbAdsInsights extends Readable {
     async _read(){
         this._started = true;
         (async () => {
-            for await (const row of this.generator<T>()){
+            for await (const row of this.generator<RowT>()){
                 if (!this.push(row)){
                     await new Promise((resolve) => this.once("drain", resolve))
                 }
@@ -62,7 +79,7 @@ export default class FbAdsInsights extends Readable {
             this.emit('error', e)
         });
     }
-	async get<T extends ReportRow>(): Promise<T[]>{
+	async get<T extends RowT>(): Promise<T[]>{
         if(this._started){
             throw new Error('Report already called')
         }
@@ -73,7 +90,7 @@ export default class FbAdsInsights extends Readable {
 		}
 		return rows
 	}
-	async *generator<T extends ReportRow>(){
+	async *generator<T extends RowT>(){
         if(this._started){
             throw new Error('Report already called')
         }
@@ -100,3 +117,9 @@ export default class FbAdsInsights extends Readable {
 		})
 	}
 }
+const fb = new FbAdsInsights({
+    accessToken:''
+},{
+    fields:[],
+
+})
