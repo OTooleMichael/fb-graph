@@ -57,12 +57,12 @@ const report = fb.insights({
 
 ```typescript
 
-const reportStream = fb.insights({
+const report = fb.insights({
 	accountId:'act_12345677898765',
 	...params
-}).stream()
+})
 
-reportStream.on('data',function(row){
+report.on('data',function(row){
 	console.log(row)
 }).on('complete',function(metaData){
 	console.log('DONE')

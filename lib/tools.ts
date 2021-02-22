@@ -3,14 +3,13 @@ import {
 	AttributionWindow,
 	InsightAction, Level,
 	ReportField, ReportBreakdown, time_increment,
-	ReportParams
+	ReportParams, NUMERIC_FIELDS
 } from './constants'
 export function wait(time: number = 200){
 	return new Promise(res=>setTimeout(res,time))
 }
 export type GetArrayElementType<T extends readonly any[]> = T extends readonly (infer U)[] ? U : never;
 
-const VAL_REG = /(impressions|clicks|reach|value|spend)/i
 export function flattenActions<T extends Record<string, string | number> = Record<string, string | number>> (
 	data: ReportRow,
 	customEventMap: Record<string, string> = {},
@@ -41,8 +40,8 @@ export function flattenActions<T extends Record<string, string | number> = Recor
 			});
 			return
 		}
-		const value = ob as string
-		if( VAL_REG.test(el) ){
+		const value = ob as string;
+		if( (NUMERIC_FIELDS as ReadonlyArray<string>).includes(el) ){
 			row[el] = parseFloat(value);
 			return
 		}

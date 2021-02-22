@@ -2,14 +2,32 @@ export type GetArrayElementType<T extends readonly any[]> = T extends readonly (
 export const GRAPH_VERSION = 'v9.0';
 export const GRAPH_DOMAIN = 'https://graph.facebook.com'
 export const GRAPH_VIDEO_DOMAIN = 'https://graph-video.facebook.com'
+// https://developers.facebook.com/docs/marketing-api/insights/parameters#fields
 export const BREAKDOWNS = [
 	'app_store_clicks','newsfeed_avg_position','newsfeed_clicks','relevance_score','newsfeed_impressions'
 ] as const
-export const FIELDS = [
-	'adset_id', 'adset_name', 'campaign_name', 'campaign_id','account_id','account_name',
-	'spend','clicks', 'imporessions',
+
+export const DIMENSION_FIELDS = [
+    'account_id', 'account_name',
+    'campaign_name', 'campaign_id',
+	'adset_id', 'adset_name', 
+    'ad_id', 'ad_name',
+
+    'attribution_setting', 'buying_type',
+    'canvas_avg_view_percent', 'canvas_avg_view_time',
+    'catalog_segment_value', 'conversion_rate_ranking',
+    'objective', 
+] as const
+export const NUMERIC_FIELDS = [  
+    'outbound_clicks', 'unique_actions',
+    'full_view_impressions', 'inline_post_engagement',
+	'spend','clicks', 'impressions',
 	'reach', 'unique_clicks', 'actions','action_values',
 	'device_platform'
+] as const
+export const FIELDS = [
+    ...DIMENSION_FIELDS,
+    ...NUMERIC_FIELDS
 ] as const
 export interface FbAPIAuth {
     accessToken: string;

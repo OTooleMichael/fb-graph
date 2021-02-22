@@ -1,20 +1,21 @@
 import {Readable} from 'stream'
-import Emitter from 'events'
 import {
 	checkAsyncStatus, createAsyncReport, downloadReport, AsyncStatus,
 } from './core'
 import {
 	FbAPIAuth, CreateReportParams, ReportRow
 } from './constants'
-export default class FbAdsInsights extends Emitter {
+export default class FbAdsInsights extends Readable {
 	auth: FbAPIAuth;
 	params: CreateReportParams;
 	reportId?: string;
 	status?: AsyncStatus;
 	totalRows: number;
-	_limit: number
+	_limit: number;
+    _started: boolean;
 	constructor(auth: FbAPIAuth, params: CreateReportParams){
-		super()
+		super({ objectMode:true })
+        this._started = false
 		this.auth = auth
 		this.params = params
 		this.params.accountId = this.params.accountId.replace('act_','')
@@ -48,26 +49,24 @@ export default class FbAdsInsights extends Emitter {
 		}
 		return reportId
 	}
-	stream<T extends ReportRow>(){
-		const stream = new Readable({
-			objectMode:true,
-			read:async ()=>{
-				(async () => {
-					for await (const row of this.generator<T>()){
-						if (!stream.push(row)){
-							await new Promise((resolve) => stream.once("drain", resolve))
-						}
-					}
-					stream.push(null)
-				})().catch(e=>{
-					console.log(e,'ERROR')
-					stream.emit('error', e)
-				});
-			}
-		})
-		return stream
-	}
+    async _read(){
+        this._started = true;
+        (async () => {
+            for await (const row of this.generator<T>()){
+                if (!this.push(row)){
+                    await new Promise((resolve) => this.once("drain", resolve))
+                }
+            }
+            this.push(null)
+        })().catch(e=>{
+            this.emit('error', e)
+        });
+    }
 	async get<T extends ReportRow>(): Promise<T[]>{
+        if(this._started){
+            throw new Error('Report already called')
+        }
+        this._started = true
 		const rows:T[] = []
 		for await(const row of this.generator<T>()){
 			rows.push(row)
@@ -75,6 +74,10 @@ export default class FbAdsInsights extends Emitter {
 		return rows
 	}
 	async *generator<T extends ReportRow>(){
+        if(this._started){
+            throw new Error('Report already called')
+        }
+        this._started = true
 		const { auth } = this
 		const { pageSize } = this.params
 		const reportId = await this.prepare()
