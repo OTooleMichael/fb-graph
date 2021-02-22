@@ -117,9 +117,3 @@ export class FbAdsInsights<RowT extends ReportRow = ReportRow> extends Readable 
 		})
 	}
 }
-const fb = new FbAdsInsights({
-    accessToken:''
-},{
-    fields:[],
-
-})
