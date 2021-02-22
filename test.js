@@ -21,28 +21,28 @@ const REQ = {
   ],
   attributionWindow:["1d_click"],//,"7d_click","28d_click"],
   attributionType:"impression" //. this is just an artifact only spend matters
-***REMOVED***;
-***REMOVED***
-	let fb = new Fb({token:TOKEN,debug:true***REMOVED***);
+};
+async function start(){
+	let fb = new Fb({token:TOKEN,debug:true});
 	let req = fb.createAdsReport(REQ);
 	let stream = await req.stream();
 	let i = 0;
 	stream.on('data',function(row){
 		if(i%50 ===0 ){
 			console.log(row,i)
-		***REMOVED***;
+		};
 		if(i === 140){
 			console.log('PAUSING ')
 			this.pause();
 			setTimeout(e=>{
 				console.log('START AGIN')
 				this.resume()
-			***REMOVED***,5000)
-		***REMOVED***
-	***REMOVED***);
+			},5000)
+		}
+	});
 	stream.on('error',e=>console.log(e));
 	stream.on('complete',function (res) {
 		console.log(res)
-	***REMOVED***)
-***REMOVED***
-***REMOVED***.catch(console.log);
+	})
+}
+start().catch(console.log);

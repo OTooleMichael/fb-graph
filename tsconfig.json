@@ -18,7 +18,7 @@
       "typeRoots": ["./node_modules/@types", "./typings"],
       "outDir": "dist",
       "declaration":true
-***REMOVED***,
+    },
     "include":[
       "lib/**/*",
       "app.ts"
@@ -29,5 +29,5 @@
       "node_modules/**/*",
       "dist"
     ]
-  ***REMOVED***
+  }
   

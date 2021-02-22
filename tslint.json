@@ -3,6 +3,6 @@
    "rules":{
        "no-console":false,
        "only-arrow-functions":false,
-       "no-shadowed-variable":{"severity": "warning"***REMOVED***
-   ***REMOVED***
-***REMOVED***
+       "no-shadowed-variable":{"severity": "warning"}
+   }
+}

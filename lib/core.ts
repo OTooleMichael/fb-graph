@@ -1,16 +1,16 @@
 import request from 'request'
-import { wait ***REMOVED*** from './tools'
+import { wait } from './tools'
 import {
   GRAPH_DOMAIN, FbAPIAuth,
   ReportRow, CreateReportParams
-***REMOVED*** from './constants'
+} from './constants'
 
 interface ErrorAPIRes {
   message: string;
   type: string,
   code: number,
   fbtrace_id: string
-***REMOVED***
+}
 export class FbException extends Error {
   type: string;
   code: number;
@@ -22,53 +22,53 @@ export class FbException extends Error {
     this.code = error.code
     this.fbtraceId = error.fbtrace_id
     this.request = reqOptions
-  ***REMOVED***
-***REMOVED***
+  }
+}
 interface ReqParams {
   method: 'POST' | 'GET' | 'PUT' | 'DELETE';
   url: string;
   qs: Record<string, any>;
   form?: Record<string, any>;
-***REMOVED***
+}
 export function requestPromise<T>(params: ReqParams): Promise<T> {
   const {
     method, url, qs, form
-  ***REMOVED*** = params
+  } = params
   const options: request.Options = {
     method,
     uri: url,
     json: true,
-    headers: {'User-Agent': `fbbizsdk-nodejs-v0.9.1`***REMOVED***,
+    headers: {'User-Agent': `fbbizsdk-nodejs-v0.9.1`},
     body: form,
     qs
-  ***REMOVED***
+  }
   return new Promise(function(resolve,reject){
     request(options, function(err, response){
       if(err){
         return reject(err)
-  ***REMOVED***
-      const { statusCode, headers, body ***REMOVED*** = response
+      }
+      const { statusCode, headers, body } = response
       try{
         if(body.error){
           throw new FbException(body.error as ErrorAPIRes, options)
-    ***REMOVED***
+        }
 
         body.requestInfo = {
           statusCode
-    ***REMOVED***
+        }
         if(headers['x-fb-ads-insights-throttle']){
           body.requestInfo = {
             ...body.requestInfo,
             ...JSON.parse(headers['x-fb-ads-insights-throttle'] as string)
-      ***REMOVED***
-    ***REMOVED***
+          }
+        }
         return resolve(body)
-  ***REMOVED***catch(err){
+      }catch(err){
         return reject(err)
-  ***REMOVED***
-***REMOVED***
-  ***REMOVED***)
-***REMOVED***
+      }
+    })
+  })
+}
 
 export interface FBAPICallParams {
   method: 'POST' | 'GET' | 'PUT' | 'DELETE';
@@ -77,34 +77,34 @@ export interface FBAPICallParams {
   files?: any;
   useMultipartFormData?: boolean;
   urlOverride?:string
-***REMOVED***
+}
 function encodeParams(params: Record<string, any>): Record<string, string> {
-  const output: Record<string, string> = {***REMOVED***
+  const output: Record<string, string> = {}
   Object.keys(params)
     .forEach((key:string) => {
       const param = params[key];
       if(typeof param === 'object'){
         output[key] = param ? JSON.stringify(param) : '';
-  ***REMOVED***else{
+      }else{
         output[key] = param
-  ***REMOVED***
-***REMOVED***
+      }
+    })
   return output
-***REMOVED***
+}
 
 export function callAPI<T>( auth:FbAPIAuth, options: FBAPICallParams): Promise<T> {
-  const { graphVersion, accessToken ***REMOVED*** = auth;
+  const { graphVersion, accessToken } = auth;
   const {
     method, path,
     urlOverride = '',
-  ***REMOVED*** = options
-  let { params = {***REMOVED*** ***REMOVED*** = options
-  let data = {***REMOVED***;
+  } = options
+  let { params = {} } = options
+  let data = {};
 
   if (method === 'POST' || method === 'PUT') {
     data = params;
-    params = {***REMOVED***;
-  ***REMOVED***
+    params = {};
+  }
   params.access_token = accessToken;
   const domain = urlOverride || GRAPH_DOMAIN;
   const url = [
@@ -116,33 +116,33 @@ export function callAPI<T>( auth:FbAPIAuth, options: FBAPICallParams): Promise<T
     url,
     qs:encodeParams(params),
     form:Object.keys(data).length ? data : undefined
-  ***REMOVED***)
-***REMOVED***
+  })
+}
 
 
 // interface ReqestMetaInfo {
 //   statusCode: number,
 //   app_id_util_pct?: number,
 //   acc_id_util_pct?: number
-// ***REMOVED***
+// }
 export async function createAsyncReport(auth: FbAPIAuth, {
   accountId, fields, breakdowns, ...options
-***REMOVED***: CreateReportParams){
+}: CreateReportParams){
   const params = {
     fields:fields ? fields.join(',') : '',
     breakdowns:breakdowns ? breakdowns.join(',') : '',
     ...options,
-  ***REMOVED***
-  const res = await callAPI<{ report_run_id:string ***REMOVED***>(auth, {
-    path:`act_${accountId***REMOVED***/insights`,
+  }
+  const res = await callAPI<{ report_run_id:string }>(auth, {
+    path:`act_${accountId}/insights`,
     method:'POST',
     params
-  ***REMOVED***)
+  })
 	if(!res.report_run_id){
 		throw new Error("NO_REPORT_ID")
-	***REMOVED***;
+	};
 	return res.report_run_id
-***REMOVED***
+}
 interface AsyncCheck {
     "id": string,
     "account_id": string,
@@ -150,17 +150,17 @@ interface AsyncCheck {
     "time_completed": number,
     "async_status": string,
     "async_percent_completion": number
-***REMOVED***
+}
 export interface AsyncStatus {
   reportId: string;
   isComplete: boolean;
   runningMillis: number;
   checkedCount: number;
   apiResponse:AsyncCheck
-***REMOVED***
+}
 export async function *checkAsyncStatus(
   auth: FbAPIAuth,
-  { reportId ***REMOVED***: { reportId:string ***REMOVED***
+  { reportId }: { reportId:string }
 ): AsyncGenerator<AsyncStatus>{
   const started = Date.now()
   const incrInterval = 2000;
@@ -170,14 +170,14 @@ export async function *checkAsyncStatus(
     waitedI++
     if(waitedI > 400){
       throw new Error('WAITING TOO LONG');
-***REMOVED***
+    }
     let waitInterval = waitedI*incrInterval;
 	  waitInterval = waitInterval > 60*1000 ? 60*1000 : waitInterval;
 
     const res = await callAPI<AsyncCheck>(auth, {
       method:'GET',
       path:reportId
-***REMOVED***
+    })
     runningMillis = Date.now() - started
     const output: AsyncStatus = {
       reportId,
@@ -185,78 +185,78 @@ export async function *checkAsyncStatus(
       runningMillis,
       checkedCount: waitedI,
       apiResponse: res
-***REMOVED***
+    }
     const {
       async_status,
       async_percent_completion:percentComplete
-***REMOVED*** = res
+    } = res
     if(async_status === 'Job Completed'){
       output.isComplete = true
       return output
-***REMOVED***
+    }
     yield output
     if(percentComplete === 100){
       await wait(200)
-***REMOVED***if(percentComplete > 0){
+    }if(percentComplete > 0){
       await wait( Math.round( runningMillis*100 / percentComplete ) )
-***REMOVED***else{
+    }else{
       await wait( waitInterval )
-***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 interface ReportRes<T> {
   data:T[],
-  paging?:{ next?:string ***REMOVED***
-***REMOVED***
+  paging?:{ next?:string }
+}
 
 interface DowloadReportReq {
   reportId:string,
   pageSize?:number
-***REMOVED***
+}
 
 export async function *downloadReport<T extends ReportRow = ReportRow>(
-  auth: FbAPIAuth, { reportId, pageSize = 5000 ***REMOVED***: DowloadReportReq
+  auth: FbAPIAuth, { reportId, pageSize = 5000 }: DowloadReportReq
 ): AsyncGenerator<T>{
-  const { data:dataTop, paging:pagingTop ***REMOVED*** = await callAPI< ReportRes<T> >(auth, {
+  const { data:dataTop, paging:pagingTop } = await callAPI< ReportRes<T> >(auth, {
     method:'GET',
     path:reportId+"/insights",
     params:{
       limit:pageSize.toString()
-***REMOVED***
-  ***REMOVED***)
+    }
+  })
   for(const row of dataTop){
     yield row
-  ***REMOVED***
+  }
   let nextPage = pagingTop?.next;
   while(nextPage){
-    const { data, paging ***REMOVED*** = await page<ReportRes<T>>(nextPage);
+    const { data, paging } = await page<ReportRes<T>>(nextPage);
     for(const row of data){
       yield row
-***REMOVED***
+    }
     nextPage = paging?.next;
-  ***REMOVED***
-***REMOVED***
+  }
+}
 export function page<T>(url: string){
-	return requestPromise<T>({method:'GET',url, qs:{***REMOVED******REMOVED***)
-***REMOVED***
+	return requestPromise<T>({method:'GET',url, qs:{}})
+}
 
 
 export async function *reportStream<T extends ReportRow>(
   auth: FbAPIAuth, params: CreateReportParams
 ): AsyncGenerator<T>{
-  const { accountId, pageSize, ...options ***REMOVED*** = params
+  const { accountId, pageSize, ...options } = params
   const reportId = await createAsyncReport(auth, {
     accountId,
     ...options
-  ***REMOVED***)
-  for await( const status of checkAsyncStatus(auth, { reportId ***REMOVED***) ){
+  })
+  for await( const status of checkAsyncStatus(auth, { reportId }) ){
     if(status.isComplete){
       break
-***REMOVED***
-  ***REMOVED***
-  const generator = downloadReport<T>(auth, { reportId, pageSize ***REMOVED***)
+    }
+  }
+  const generator = downloadReport<T>(auth, { reportId, pageSize })
   for await(const row of generator){
     yield row
-  ***REMOVED***
-***REMOVED***
+  }
+}
